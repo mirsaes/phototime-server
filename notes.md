@@ -71,16 +71,8 @@ the repos
  docker build -t mirsaes/phototime-server .
  docker run -p 49160:8080 --mount type=bind,source="/c/coding/git/phototime-client",target=/dir1 -d mirsaes/phototime-server
 ```
-# Dependencies
+
+# External Dependencies
 * ImageMagick
   * ImageMagick 6.9.2-8 (64 bit)
 
-# Roadmap
-* ideas
-  * Dockerfile for server, to simplify dependencies
-  * android app ala JobHunter
-  * rate functionality
-  * integrate cropping on front-end/backend
-    * e.g. https://www.npmjs.com/package/cropperjs
-    * when first was looking, considered darkroomjs, but that appears to have lost steam
-  * and many more

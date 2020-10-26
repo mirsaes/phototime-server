@@ -2,7 +2,8 @@
 PhotoTime Server - fun time, photo time, cleaning house, making stuff
 
 PhotoTime is intended to help sort through piles of photos to turn idle time into fun and productive time.
-PhotoTime will enable access and modification of photos from a mobile app.
+PhotoTime will enable access and modification of photos from a mobile app or your comfortable device.
+
 This includes raw files and the ability to rate, delete, crop, and edit, etc.
 The sources for photos are intended to be via various channels, but initial target is via home based computers.
 
@@ -13,6 +14,45 @@ The main goals are to
 
 ## History
 
-PhotoTime (client and server) has been non-versioned (privately versioned) for many years, simmering in incubation.
+PhotoTime (client and server) has been non-versioned (privately versioned since 2013) for many years, simmering in incubation.
 The server was originally written with CoffeeScript, but in this reincarnation it is ported to TypeScript.
 
+Just searching now in 2020 and see that PhotoTime name was also used by Orbeus and acquired by Amazon for AI purposes around 2016.
+
+# Getting Started
+Hiya, lets get started.
+
+We can use Docker a bit later, for now, <b>clone the code</b> and manually install some stuff
+
+## install dependencies
+* npm and node
+* imagemagick cli
+
+## configuration
+* create an appConfig.json to define the servers "repos" and working directories (trash and thumbs, etc)
+    * see the sample-appConfig.json
+    * recommend specifying the jquery phototime-client webapp but can also just use the "swagger" endpoints
+
+## build and run
+```
+npm install
+npm start
+```
+
+## explore
+* use a browser to hit your server
+    * webapp
+        * http://lanip:8080/webapp/
+        * must clone code for webapp for now at phototime-client and have mapped in the appConfig.json
+    * swagger -> http://lanip:8080/
+
+# Roadmap
+* upload jquery webapp
+* other ideas
+  * Dockerfile for server, to simplify dependencies
+  * android app ala [JobHunter](https://play.google.com/store/apps/details?id=com.mirsaes.jobhunter)
+  * rate functionality
+  * integrate cropping on front-end/backend
+    * e.g. https://www.npmjs.com/package/cropperjs
+    * when first was looking, considered darkroomjs, but that appears to have lost steam
+  * and many more
