@@ -47,7 +47,8 @@ npm start
     * swagger -> http://lanip:8080/
 
 # Roadmap
-* upload jquery webapp
+* upload [jquery webapp](https://github.com/mirsaes/phototime-client)
+    * done, oh yeah, cue the coolaid
 * other ideas
   * Dockerfile for server, to simplify dependencies
   * android app ala [JobHunter](https://play.google.com/store/apps/details?id=com.mirsaes.jobhunter)
