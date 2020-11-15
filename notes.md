@@ -70,11 +70,12 @@ the repos
 ```
  docker build -t mirsaes/phototime-server .
  
- docker run -d -p 8080:8080 \
+ docker run --rm -d -p 8080:8080 \
  --mount type=bind,source="/full/path/for/runtime/data",target="/phototime-data" \
  --mount type=bind,source="/full/path/to/dir/with/images",target="/phototime-repos/repo1" \
  --mount type=bind,source="/full/path/to/phototime-client/webapp",target="/phototime-client" \
- --mount type=bind,source="/full/path/to/phototime-server/app/docker/config.json",target="/usr/src/phototime-server/appConfig.json" mirsaes/phototime-server
+ --mount type=bind,source="/full/path/to/phototime-server/app/docker/config.json",target="/usr/src/phototime-server/appConfig.json" \
+ --name phototime mirsaes/phototime-server
 ```
 
 # External Dependencies

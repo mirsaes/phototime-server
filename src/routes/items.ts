@@ -114,10 +114,27 @@ export default function(app: express.Application) {
             res.send("500");
         });
     });
-    // could make this a del call
+
+    /**
+     * @swagger
+     * /item/{itemid}:
+     *  delete:
+     *      description: delete the item (i.e. move to trash)
+     *      tags:
+     *      - Items
+     *      parameters:
+     *          - in: path
+     *            name: itemid
+     *            required: true
+     *            description: the item id, i.e. the repo id plus the item path (id)
+     *      produces:
+     *        - application/json
+     *      responses:
+     *          200:
+     *              description: moonlight
+     */
     app.delete("/item/*", (req, res) => {
-    // app.get("/del/item/*", (req, res) => {
-        const pathUrl = decodeURIComponent(req.url.replace("/del/item/", ""));
+        const pathUrl = decodeURIComponent(req.url.replace("/item/", ""));
         console.log("del req url=" + pathUrl);
         console.log ("pathUrl=" + pathUrl);
         // can this ever happen?
