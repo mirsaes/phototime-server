@@ -46,14 +46,17 @@ npm start
         * must clone code for webapp for now at phototime-client and have mapped in the appConfig.json
     * swagger -> http://lanip:8080/
 
-# Roadmap
-* upload [jquery webapp](https://github.com/mirsaes/phototime-client)
-    * done, oh yeah, cue the coolaid
-* other ideas
-  * Dockerfile for server, to simplify dependencies
-  * android app ala [JobHunter](https://play.google.com/store/apps/details?id=com.mirsaes.jobhunter)
-  * rate functionality
-  * integrate cropping on front-end/backend
-    * e.g. https://www.npmjs.com/package/cropperjs
-    * when first was looking, considered darkroomjs, but that appears to have lost steam
-  * and many more
+# Roadmap - ideas
+* android app ala [JobHunter](https://play.google.com/store/apps/details?id=com.mirsaes.jobhunter)
+* integrate cropping on front-end/backend
+  * e.g. https://www.npmjs.com/package/cropperjs
+  * when first was looking, considered darkroomjs, but that appears to have lost steam
+* and many more
+  
+# Version History
+* 2020.11.14 - Dockerfile for server, to simplify dependencies
+  * arooga
+* 2020.11.14 - rate functionality
+  * more juice 
+* 2020.10.25 - upload [jquery webapp](https://github.com/mirsaes/phototime-client)
+  * oh yeah, cue the coolaid
