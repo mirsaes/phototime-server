@@ -60,3 +60,5 @@ npm start
   * more juice 
 * 2020.10.25 - upload [jquery webapp](https://github.com/mirsaes/phototime-client)
   * oh yeah, cue the coolaid
+* 2013 and before
+  * coffee script fun, wow, has it really been that long?
