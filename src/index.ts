@@ -57,6 +57,7 @@ const specs = swaggerJsDoc(swaggerOptions);
 
 // TODO: declare subclass that has own typed data and functions for app
 const app = express();
+app.use(express.json());
 routes.loadRoutes(app);
 
 const port = Number(argv.port); // 8080; // default port to listen
@@ -67,9 +68,9 @@ const host = "" + argv.host;
 // read the first arg to get the config from command line
 // e.g. coffee photoTime.coffee config.mptosh.json
 // if supply a directory it will bomb
-let appConfigFileName: any = "./appConfig.json";
+let appConfigFileName: string = "./appConfig.json";
 if (argv.appConfig) {
-    appConfigFileName = argv.appConfig;
+    appConfigFileName = "" + argv.appConfig;
 }
 
 console.log("appConfigFileName='" + appConfigFileName + "'");
@@ -141,7 +142,7 @@ app.listen( port, host, () => {
 /*
     FoggyBridge (homecloud)
     homecloud
-    VBox
+    VBox/Docker for *
     homecloud/apps/phototime-server/shared/
         map host->docker-machine->docker
     homecloud/apps/phototime-server/config/
@@ -185,27 +186,6 @@ app.listen( port, host, () => {
 Data to store
 Data to read/write
     TODOS:
-
-Dockerfile with volumes
-    volumes are used to map drives/folders into "repos"?
-        -v "C:\\phototimeconfig\":"\phototime\configs"
-            repos.config
-        -v "C:\\Someplace:repos/someplace
-        -v "/homecloud"
-
-    Docker Toolbox
-        https://stackoverflow.com/questions/33126271/how-to-use-volume-option-with-docker-toolbox-on-windows
-        must share volume into docker machine (default vm in virtual box)
-        then can mount
-
-    Docker for Windows
-        ..?
-    Docker for Mac
-        ..?
-    Docker for Ubuntu?
-        ..?
-
-App Reads phototimeconfig
 
 routes
     * /image/*.jpg

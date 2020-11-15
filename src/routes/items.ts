@@ -1,8 +1,27 @@
 import express from "express";
+import { ImageMetadata } from "../image-metadata";
 
 // path = require 'path'
 export default function(app: express.Application) {
     // 	# item/D:/Pictures/df/df
+    /**
+     * @swagger
+     * /item/{itemid}:
+     *  get:
+     *      description: get ccontents of repo or some subpath of repo
+     *      tags:
+     *      - Items
+     *      parameters:
+     *          - in: path
+     *            name: itemid
+     *            required: true
+     *            description: the item id, i.e. the repo id plus the item path (id)
+     *      produces:
+     *        - application/json
+     *      responses:
+     *          200:
+     *              description: carrickfergus
+     */
     app.get("/item/*", (req, res) => {
         let pathUrl = req.url.replace("/item/", "");
         pathUrl = decodeURIComponent(pathUrl);
@@ -34,8 +53,71 @@ export default function(app: express.Application) {
         // res.send '404'
     });
 
-    app.get("/del/item/*", (req, res) => {
-        const pathUrl = req.url.replace("/del/item/", "");
+    /**
+     * @swagger
+     * /item/{itemid}:
+     *  post:
+     *      description: modify contents of repo item, e.g. rating.
+     *      tags:
+     *      - Items
+     *      parameters:
+     *          - in: path
+     *            name: itemid
+     *            required: true
+     *            description: the item id, i.e. the repo id plus the item path (id)
+     *          - in: body
+     *            name: rating
+     *            required: false
+     *            description: the rating to apply or if not specified, to remove
+     *      produces:
+     *        - application/json
+     *      responses:
+     *          200:
+     *              description: carrickfergus
+     */
+    app.post("/item/*", (req, res) => {
+        // could make this a rating endpoint instead?
+        const itemId = decodeURIComponent(req.url.replace("/item/", "")).split("?")[0];
+        // can this ever happen?
+        if (itemId.indexOf("..") !== -1) {
+            res.send("404");
+        }
+
+        // ensure repos are cached
+        const cachedRepos = app.phototime.getCachedRepos();
+        const repo = app.phototime.getParentRepo(itemId);
+        if (!repo) {
+            res.send("404");
+        }
+        const resItem: any = {};
+
+        app.phototime.rateItem(repo, itemId, req.body.rating);
+        res.send("200");
+    });
+
+    app.get("/metadata/*", (req, res) => {
+        const itemId = decodeURIComponent(req.url.replace("/metadata/", "")).split("?")[0];
+        // can this ever happen?
+        if (itemId.indexOf("..") !== -1) {
+            res.send("404");
+        }
+        const cachedRepos = app.phototime.getCachedRepos();
+        const repo = app.phototime.getParentRepo(itemId);
+        if (!repo) {
+            res.send("404");
+        }
+
+        var imageMetadata = new ImageMetadata(itemId);
+        imageMetadata.readAll().then(metadata => {
+            res.json(metadata);
+        }).catch((reason) => {
+            res.send("500");
+        });
+    });
+    // could make this a del call
+    app.delete("/item/*", (req, res) => {
+    // app.get("/del/item/*", (req, res) => {
+        const pathUrl = decodeURIComponent(req.url.replace("/del/item/", ""));
         console.log("del req url=" + pathUrl);
         console.log ("pathUrl=" + pathUrl);
         // can this ever happen?

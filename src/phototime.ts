@@ -7,6 +7,7 @@ import { Thumb } from "./thumb";
 import { Util } from "./util";
 
 import fs from "fs";
+import { ImageMetadata } from "./image-metadata";
 
 // TODO: refile
 const folderThumb = "/thumbs/folder.jpg";
@@ -31,7 +32,8 @@ export class Phototime {
         let idPath = apath.replace(/\\/g, "/");
 
         // replace escaped space char with space
-        idPath = idPath.replace(/\%20/g, " ");
+        // idPath = idPath.replace(/\%20/g, " ");
+        idPath = decodeURIComponent(idPath);
 
         // remove trailing forward slash
         while (idPath[idPath.length - 1] === "/") {
@@ -269,6 +271,21 @@ export class Phototime {
             return {id: itemFullPath, type: "file", thumb: thumbUrl, label: fileName};
         }
         return;
+    }
+
+    public rateItem(repo: any, itemFullPath: string, rating: number) {
+        const itemStats = fs.statSync(itemFullPath);
+        if (itemStats.isDirectory()) {
+            // huh?
+            console.log(`rating a folder, blah. ${itemFullPath}`);
+        }
+
+        if (!itemStats.isFile())
+            return;
+        
+        // rate item
+        var imageMetadata = new ImageMetadata(itemFullPath);
+        imageMetadata.rateItem(rating);
     }
 
 }

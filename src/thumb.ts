@@ -1,6 +1,8 @@
 import exec from "child_process";
 // requires imagemagic cli tools to be installed..
 import im from "imagemagick";
+import { showCompletionScript } from "yargs";
+import { ImageMetadata } from "./image-metadata";
 import { Util } from "./util";
 
 export class Thumb {
@@ -11,6 +13,8 @@ export class Thumb {
     // ?
     public processDest: string;
     public resizeWidth: number;
+
+    public srcMetadata: any;
 
     constructor(srcFile: string, destFile: string) {
         // console.log @srcFile
@@ -96,27 +100,48 @@ export class Thumb {
             return;
         }
 
-        const resizeOptions: im.Options = {
-            dstPath: dest,
-            srcPath: orig,
-            // depth: 16,
-            width: resizeWidth
-        };
-        // not raw
-        im.resize(resizeOptions,
-            (err, result) => {
-                me.done = true;
-                if (err) {
-                    console.log (err);
-                } else {
-                    console.log("ok");
+        // TODO: extract exif that wish to preserve..
+        // Rating, rotation?, etc
+        // console.log(`identifying ${orig}`);
+        // TODO: actually use exiftool, easier format
+        // provides Rating       : #
+        // exec.exec(`identify -verbose ${orig}`,
+        // | grep Rating
+        var imageMetadata = new ImageMetadata(orig);
+        imageMetadata.readAll().then((metadata: any ) => {
+            this.srcMetadata = metadata;
+            const resizeOptions: im.Options = {
+                dstPath: dest,
+                srcPath: orig,
+                // depth: 16,
+                width: resizeWidth
+            };
+
+            // not raw
+            im.resize(resizeOptions,
+                (err, result) => {
+                    me.done = true;
+                    if (err) {
+                        console.log (err);
+                    } else {
+                        if (this.srcMetadata && this.srcMetadata.Rating >= 0) {
+                            console.log(`TODO: set rating into thumb as well or ... ${this.srcMetadata.Rating}`);
+                            // or just send metadata back with image info?
+                            var thumbMetadata = new ImageMetadata(dest);
+                            thumbMetadata.rateItem(metadata.Rating);
+                        }
+                    }
                 }
-            }
-        );
+            );
+        });
+        // im.identify(orig, (err: Error, features: im.Features) => {
+        //    features.
+        // });
 
         return;
     }
 
+    /*
     public make() {
         const orig = this.srcFile;
         let dest = this.destFile;
@@ -176,4 +201,5 @@ export class Thumb {
         }
         return dest;
     }
+    */
 }

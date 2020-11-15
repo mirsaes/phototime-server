@@ -1,0 +1,12 @@
+{
+    "root":"C:\\coding\\phototime",
+    "thumbs":"path/to/thumbs/folder/relative/to/root",
+    "trash":"path/to/trash/folder/relative/to/root",
+    "repos":[
+        {
+            "path":"full path to top folder of 'repo' of images",
+            "label":"My Test Pictures"
+        }
+    ],
+    "webapp":"path to webapp, see phototime-client-jquery"
+}

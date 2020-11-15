@@ -29,6 +29,24 @@ export default function(app: express.Application) {
         res.json(repos);
     });
 
+    /**
+     * @swagger
+     * /repo/{repoid}:
+     *  get:
+     *      description: get ccontents of repo or some subpath of repo
+     *      tags:
+     *      - Repos
+     *      parameters:
+     *          - in: path
+     *            name: repoid
+     *            required: true
+     *            description: the repo id
+     *      produces:
+     *        - application/json
+     *      responses:
+     *          200:
+     *              description: la de *** da
+     */
     app.get("/repo/*", (req, res) => {
         // everything following /repo is the path
         // but return nothing if contains ..
