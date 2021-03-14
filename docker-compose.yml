@@ -16,4 +16,4 @@ services:
         target: /phototime-client
       - type: bind
         source: ${PHOTOTIME_APP_CONFIG_FILE}
-        target: /usr/src/phototime-server/appConfig.json
+        target: /phototime-server/appConfig.json

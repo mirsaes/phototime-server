@@ -86,7 +86,7 @@ export class Thumb {
 
         if (this.raw) {
             // create thumbnail for raw file
-            exec.exec(`dcraw -c ${orig} | convert - -resize ${resizeWidth} ${dest}`,
+            exec.exec(`dcraw -c "${orig}" | convert - -resize ${resizeWidth} "${dest}"`,
                 (err, stderr, stdout) => {
                     me.done = true;
                     if (err) {

@@ -21,7 +21,7 @@ export class ImageMetadata {
     public async readAll(): Promise<any> {
 
         return new Promise((resolve, reject) => {
-            exec.exec(`exiftool ${this.srcFile}`,
+            exec.exec(`exiftool "${this.srcFile}"`,
             (exifErr: exec.ExecException, stdoutText, stderrText ) => {
                 if (!exifErr) {
                     // which exiftool library to use? not sure, just load properties as a dictionary for now
@@ -61,7 +61,7 @@ export class ImageMetadata {
         // could make this a config for "safety"
         const overwriteOriginal = "-overwrite_original";
         // exiftool -rating=3 -ratingpercent=60 imagepath
-        exec.exec(`exiftool ${overwriteOriginal} -rating=${rating} -ratingpercent=${ratingPercent} ${this.srcFile}`,
+        exec.exec(`exiftool ${overwriteOriginal} -rating=${rating} -ratingpercent=${ratingPercent} "${this.srcFile}"`,
             (exifErr: exec.ExecException, stdoutText, stderrText ) => {
                 if (!exifErr) {
                     console.log(`rated item? rating=${rating} ratingpercent=${ratingPercent}`);
