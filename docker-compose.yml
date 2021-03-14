@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  phototime-server:
+    image: mirsaes/phototime-server
+    ports:
+      - 8080:8080
+    volumes:
+      - type: bind
+        source: ${PHOTOTIME_DATA_DIR}
+        target: /phototime-data
+      - type: bind
+        source: ${PHOTOTIME_REPO1_DIR}
+        target: /phototime-repos/repo1
+      - type: bind
+        source: ${PHOTOTIME_WEBAPP_DIR}
+        target: /phototime-client
+      - type: bind
+        source: ${PHOTOTIME_APP_CONFIG_FILE}
+        target: /usr/src/phototime-server/appConfig.json

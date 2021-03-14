@@ -1,8 +1,8 @@
 import path from "path";
+import { ImageEdit } from "./image-edit";
 import { LaunchConfig } from "./launch-config";
 import { PhototimeConfig } from "./phototime-config";
 import { Repo } from "./repo";
-import { RepoDefinition } from "./repo-definition";
 import { Thumb } from "./thumb";
 import { Util } from "./util";
 
@@ -10,7 +10,7 @@ import fs from "fs";
 import { ImageMetadata } from "./image-metadata";
 
 // TODO: refile
-const folderThumb = "/thumbs/folder.jpg";
+const folderThumb = "/thumb/folder.svg";
 
 export class Phototime {
     public config: PhototimeConfig;
@@ -53,7 +53,7 @@ export class Phototime {
             repos.push({
                 id: this.pathToId(repo.path),
                 label: repo.label,
-                thumb: "/thumb/repo.png"
+                thumb: "/thumb/repo.svg"
             });
         }
         return repos;
@@ -126,13 +126,13 @@ export class Phototime {
     }
 
     public getThumbUrl(filePath: string) {
-        const fullPath = filePath.replace(":", "/");
         // /thumbs/path/to/file
         // spawn thumb creator..? to create thumb for file
         // 256x256, 8 bit?
-
-        let thumbFullPath = this.config.thumbs + "/" + fullPath;
-        thumbFullPath = thumbFullPath.replace("//", "/");
+        const thumbFullPath = this.getFileThumbUrl(filePath);
+        // const fullPath = filePath.replace(":", "/");
+        // let thumbFullPath = this.config.thumbs + "/" + fullPath;
+        // thumbFullPath = thumbFullPath.replace("//", "/");
 
         const imfilepath = filePath;
 
@@ -280,12 +280,67 @@ export class Phototime {
             console.log(`rating a folder, blah. ${itemFullPath}`);
         }
 
-        if (!itemStats.isFile())
+        if (!itemStats.isFile()) {
             return;
-        
+        }
+
         // rate item
-        var imageMetadata = new ImageMetadata(itemFullPath);
+        const imageMetadata = new ImageMetadata(itemFullPath);
         imageMetadata.rateItem(rating);
     }
 
+    public async cropImage(id: string, cropParams: { x: any; y: any; width: any; height: any; }) {
+
+        // crop src, crop thumb..
+        const croppedOriginalUrl = id + "_cropped.jpg";
+        const thumbUrl = this.getFileThumbUrl(id);
+        const croppedThumbUrl = thumbUrl + "_cropped.jpg";
+        console.log(`crop thumb: ${croppedThumbUrl}`);
+        console.log(`crop src: ${croppedOriginalUrl}`);
+
+        // params are in terms of "thumb size"
+        // need to convert
+        // read thumb size, compute scale factor
+        // scale each crop param
+        // crop original
+        const originalMetadata = new ImageMetadata(id);
+        const thumbMetadata = new ImageMetadata(thumbUrl);
+
+        const metadataOriginal = await originalMetadata.readAll();
+        const metadataThumb = await thumbMetadata.readAll();
+        const originalWidth = metadataOriginal["Image Width"];
+        const originalHeight = metadataOriginal["Image Height"];
+        const originalSize = metadataOriginal["Image Size"];
+        // console.log(originalWidth);
+        // console.log(originalHeight);
+        // console.log(originalSize);
+        const thumbWidth = metadataThumb["Image Width"];
+        const thumbHeight = metadataThumb["Image Height"];
+        const thumbSize = metadataThumb["Image Size"];
+        // console.log(thumbWidth);
+        // console.log(thumbHeight);
+        // console.log(thumbSize);
+        const scaleFactor = originalWidth / thumbWidth;
+        // console.log(`scaleFactor=${scaleFactor}`);
+        const originalCropParams = {
+            x: scaleFactor * cropParams.x,
+            y: scaleFactor * cropParams.y,
+            width: scaleFactor * cropParams.width,
+            height: scaleFactor * cropParams.height
+        };
+
+        const editor = new ImageEdit();
+        const thumbCropResponse = await editor.crop(thumbUrl, croppedThumbUrl,
+            cropParams.x, cropParams.y, cropParams.width, cropParams.height);
+        return editor.crop(id, croppedOriginalUrl,
+            originalCropParams.x, originalCropParams.y,
+            originalCropParams.width, originalCropParams.height);
+    }
+
+    protected getFileThumbUrl(filePath: string): string {
+        const fullPath = filePath.replace(":", "/");
+        let thumbFullPath = this.config.thumbs + "/" + fullPath;
+        thumbFullPath = thumbFullPath.replace("//", "/");
+        return thumbFullPath;
+    }
 }

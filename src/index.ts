@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 
 import fs from "fs";
 import path from "path";
@@ -10,7 +10,6 @@ import * as yargs from "yargs";
 import { LaunchConfig } from "./launch-config";
 import { Phototime } from "./phototime";
 import { PhototimeConfig } from "./phototime-config";
-import { RepoDefinition } from "./repo-definition";
 
 import * as routes from "./routes/routes";
 
@@ -58,6 +57,7 @@ const specs = swaggerJsDoc(swaggerOptions);
 // TODO: declare subclass that has own typed data and functions for app
 const app = express();
 app.use(express.json());
+
 routes.loadRoutes(app);
 
 const port = Number(argv.port); // 8080; // default port to listen
@@ -116,22 +116,56 @@ console.log("thumbdir =" + app.phototime.getConfig().thumbs);
 app.get( "/", ( req, res ) => {
     let resText: string = "<html><body>Hello, please navigate to the following";
     resText += "<ul>";
-    resText += '<li><a href="/webapp">/webapp</a></li>';
     resText += '<li><a href="/api-docs">/api-docs</a></li>';
+    // for (let webappConfig in appConfig.webapps) {
+    //    console.log(webappConfig);
+    // }
+    if (appConfig.webapp) {
+        resText += '<li><a href="/webapp">/webapp</a></li>';
+    }
+    if (appConfig.webapp2) {
+        resText += '<li><a href="/webapp2">/webapp2</a></li>';
+    }
     resText += "</ul></body></html>";
     res.end( resText );
 } );
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
-
+// assumes launching from directory above dist..
+app.use("/thumb", express.static("dist/thumb"));
 // optionally bind the webapp as static
 // app.use("/webapp", express.static("C:/Coding/bb/mega/photoTime/webapp/jQueryMobile"));
 if (appConfig.webapp) {
     app.use("/webapp", express.static(appConfig.webapp));
 }
 
+if (appConfig.webapp2) {
+    app.use("/webapp2", express.static(appConfig.webapp2));
+}
+
 // serve the generated thumbnails
 app.use("/thumbs", express.static(app.phototime.config.thumbs));
+/// thumb - static icons for app
+// app.use("/thumb", express.static())
+// temporary hack while debugging
+// redirect unmatched paths to root index to load webapp
+function redirectUnmatched(req: any, res: any) {
+    console.log(req.path);
+    let redir = null;
+    if (req.path.startsWith("/webapp/")) {
+        redir = "webapp/";
+    } else if (req.path.startsWith("/webapp2/")) {
+        redir = "webapp2/";
+    }
+
+    if (redir != null) {
+        res.redirect(`http://${host}:${port}/${redir}`);
+    } else {
+        res.status(404).end("Not Found");
+    }
+}
+
+app.use(redirectUnmatched);
 
 // start the Express server
 app.listen( port, host, () => {

@@ -1,12 +1,14 @@
 import express from "express";
 import fs from "fs";
 
+import image_edit_route from "./imageEdit";
 import items_route from "./items";
 import repos_route from "./repos";
 
 export function loadRoutes(app: express.Application) {
     repos_route(app);
     items_route(app);
+    image_edit_route(app);
 
     /*
     fs.readdirSync(__dirname).forEach((file) => {
