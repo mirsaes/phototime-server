@@ -102,6 +102,7 @@ const photoTimeConfig = new PhototimeConfig(
     process.cwd(),
     path.join(appConfig.root, "tmp")
 );
+
 app.phototime = new Phototime(photoTimeConfig, appConfig);
 
 console.log("thumbdir =" + app.phototime.getConfig().thumbs);

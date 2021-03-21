@@ -28,8 +28,7 @@ export class ImageMetadata {
                     const lines = stdoutText.split("\n");
                     const metadata: any = {};
                     for (const line of lines) {
-                        line.trim();
-                        const parts = line.split(":");
+                        const parts = line.trim().split(":");
                         if (parts.length !== 2) {
                             continue;
                         }
@@ -39,9 +38,10 @@ export class ImageMetadata {
                     }
                     resolve(metadata);
                 } else {
-                    console.log("oops");
+                    console.log("oops - exif error occurred");
 
-                    console.log(stderrText);
+                    console.log(exifErr);
+                    console.log(`stderrText=${stderrText}`);
                     throw stderrText;
                 }
         });

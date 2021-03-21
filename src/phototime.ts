@@ -172,6 +172,13 @@ export class Phototime {
         return this.config;
     }
 
+    // TODO: refactor to thumb service
+    public getThumbStatus() {
+        return {
+            activeThumbTasks: this.activeThumbTasks
+        };
+    }
+
     public processThumbs() {
         // console.log 'checking thumbs ...'
         // remove done tasks
