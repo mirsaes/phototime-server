@@ -95,26 +95,6 @@ export default function(app: express.Application) {
         res.send("200");
     });
 
-    app.get("/metadata/*", (req, res) => {
-        const itemId = decodeURIComponent(req.url.replace("/metadata/", "")).split("?")[0];
-        // can this ever happen?
-        if (itemId.indexOf("..") !== -1) {
-            res.send("404");
-        }
-        const cachedRepos = app.phototime.getCachedRepos();
-        const repo = app.phototime.getParentRepo(itemId);
-        if (!repo) {
-            res.send("404");
-        }
-
-        const imageMetadata = new ImageMetadata(itemId);
-        imageMetadata.readAll().then((metadata) => {
-            res.json(metadata);
-        }).catch((reason) => {
-            res.send("500");
-        });
-    });
-
     /**
      * @swagger
      * /item/{itemid}:

@@ -3,6 +3,7 @@ import fs from "fs";
 
 import image_edit_route from "./imageEdit";
 import items_route from "./items";
+import metadata_route from "./metadata";
 import repos_route from "./repos";
 import status_route from "./status";
 
@@ -11,7 +12,7 @@ export function loadRoutes(app: express.Application) {
     items_route(app);
     image_edit_route(app);
     status_route(app);
-
+    metadata_route(app);
     /*
     fs.readdirSync(__dirname).forEach((file) => {
         if (file === "routes.js") {
