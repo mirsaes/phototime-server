@@ -1,9 +1,8 @@
 # https://nodejs.org/en/docs/guides/nodejs-docker-webapp/
 # https://nodejs.org/en/about/releases/
-FROM node:14
+FROM node:14 as builder
 
 LABEL maintainer="mirsaes"
-ENV NODE_ENV=production
 
 # install image-magic, etc
 RUN apt-get update && \
@@ -13,20 +12,45 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Create app directory
-WORKDIR /usr/src/phototime-server
+WORKDIR /phototime-server
 
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 # where available (npm@5+)
 COPY package*.json ./
 
-RUN npm install --production
+# build
+RUN npm install
+#RUN npm install -g tslint typescript
 
 # If you are building your code for production
-RUN npm ci --only=production
-
+#RUN npm ci --only=production
 # Bundle app source
 COPY . .
+RUN npm run-script build
+
+### 
+FROM node:14 as app
+LABEL maintainer="mirsaes"
+
+WORKDIR /phototime-server
+
+# install image-magic, etc
+RUN apt-get update && \
+    apt-get -y install imagemagick \
+        libimage-exiftool-perl \
+        dcraw && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV NODE_ENV=production
+
+COPY package*.json ./
+#COPY --from=builder /phototime-server/src ./src
+#COPY --from=builder /phototime-server/tools ./tools
+
+RUN npm install --production
+RUN npm ci --only=production
+COPY --from=builder /phototime-server/dist ./dist
 
 EXPOSE 8080
 

@@ -107,8 +107,8 @@ export default function(app: express.Application) {
             res.send("404");
         }
 
-        var imageMetadata = new ImageMetadata(itemId);
-        imageMetadata.readAll().then(metadata => {
+        const imageMetadata = new ImageMetadata(itemId);
+        imageMetadata.readAll().then((metadata) => {
             res.json(metadata);
         }).catch((reason) => {
             res.send("500");

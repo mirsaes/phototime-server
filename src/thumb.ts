@@ -1,7 +1,6 @@
 import exec from "child_process";
+import { ImageEdit } from "./image-edit";
 // requires imagemagic cli tools to be installed..
-import im from "imagemagick";
-import { showCompletionScript } from "yargs";
 import { ImageMetadata } from "./image-metadata";
 import { Util } from "./util";
 
@@ -87,7 +86,7 @@ export class Thumb {
 
         if (this.raw) {
             // create thumbnail for raw file
-            exec.exec(`dcraw -c ${orig} | convert - -resize ${resizeWidth} ${dest}`,
+            exec.exec(`dcraw -c "${orig}" | convert - -resize ${resizeWidth} "${dest}"`,
                 (err, stderr, stdout) => {
                     me.done = true;
                     if (err) {
@@ -107,99 +106,24 @@ export class Thumb {
         // provides Rating       : #
         // exec.exec(`identify -verbose ${orig}`,
         // | grep Rating
-        var imageMetadata = new ImageMetadata(orig);
+        const imageMetadata = new ImageMetadata(orig);
         imageMetadata.readAll().then((metadata: any ) => {
             this.srcMetadata = metadata;
-            const resizeOptions: im.Options = {
-                dstPath: dest,
-                srcPath: orig,
-                // depth: 16,
-                width: resizeWidth
-            };
-
             // not raw
-            im.resize(resizeOptions,
-                (err, result) => {
-                    me.done = true;
-                    if (err) {
-                        console.log (err);
-                    } else {
-                        if (this.srcMetadata && this.srcMetadata.Rating >= 0) {
-                            console.log(`TODO: set rating into thumb as well or ... ${this.srcMetadata.Rating}`);
-                            // or just send metadata back with image info?
-                            var thumbMetadata = new ImageMetadata(dest);
-                            thumbMetadata.rateItem(metadata.Rating);
-                        }
-                    }
+            const editor = new ImageEdit();
+
+            editor.resize(orig, dest, resizeWidth).then((result) => {
+                console.log("done: " + dest);
+                me.done = true;
+                if (this.srcMetadata && this.srcMetadata.Rating >= 0) {
+                    // console.log(`TODO: set rating into thumb as well or ... ${this.srcMetadata.Rating}`);
+                    // or just send metadata back with image info?
+                    const thumbMetadata = new ImageMetadata(dest);
+                    thumbMetadata.rateItem(metadata.Rating);
                 }
+            }
             );
         });
-        // im.identify(orig, (err: Error, features: im.Features) => {
-        //    features.
-        // });
-
         return;
     }
-
-    /*
-    public make() {
-        const orig = this.srcFile;
-        let dest = this.destFile;
-
-        if (Util.doesFileExist(dest)) {
-            return dest;
-        }
-
-        const destNodes = dest.split("/");
-        // splice modifies array
-        const destNodeExt = destNodes.splice(destNodes.length - 1, 1)[0];
-        destNodes.push(destNodeExt);
-        // really last node name
-        const extNodes = destNodeExt[0].split(".");
-        const ext = "." + extNodes[extNodes.length - 1];
-        console.log(ext);
-        if (ext in [".cr2", ".CR2"]) {
-            Util.mymakeDirs(destNodes);
-            console.log("yikes its raw");
-            dest = `${dest}.jpg`;
-
-            if (Util.doesFileExist(dest)) {
-                return dest;
-            }
-
-            console.log("starting resize", orig, dest);
-            exec.exec(`dcraw -c ${orig} | convert - -resize ${this.resizeWidth} ${dest}`,
-                (err, stderr, stdout) => {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        console.log("ok");
-                    }
-                }
-            );
-        } else {
-            console.log("starting resize", orig, dest);
-            // #destNodes = destNodes.splice destNodes.length-2, 1
-            Util.mymakeDirs(destNodes);
-
-            const resizeOptions: im.Options = {
-                dstPath: dest,
-                srcPath: orig,
-                // depth: 16,
-                width: 800
-            };
-
-            im.resize(resizeOptions,
-                (err, result) => {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        console.log("ok");
-                    }
-                }
-            );
-        }
-        return dest;
-    }
-    */
 }

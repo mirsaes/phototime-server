@@ -54,6 +54,10 @@ npm start
 * and many more
   
 # Version History
+* 2021.03.13 - WIP adding cropping capability
+  * removed node im as just gets in the way
+  * added a few wait for it ....
+  *       async await usages
 * 2020.11.14 - Dockerfile for server, to simplify dependencies
   * arooga
 * 2020.11.14 - rate functionality
