@@ -3,4 +3,3 @@ dist
 appConfig.json
 docker-app-config.json
 .env
-

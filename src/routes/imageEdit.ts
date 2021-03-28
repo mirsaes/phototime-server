@@ -15,10 +15,7 @@ export default function(app: express.Application) {
      *              description: repos blah
      */
     app.put("/imageedit/crop/*", async (req, res) => {
-        console.log("**** starting crop route *****");
-        console.log(req.body);
         const pathUrl = decodeURIComponent(req.url.replace("/imageedit/crop/", "")).split("?")[0];
-        console.log("pathUrl=" + pathUrl);
         // can this ever happen?
         if (pathUrl.indexOf("..") !== -1) {
             res.send("404");
@@ -55,7 +52,6 @@ export default function(app: express.Application) {
         } catch (ex) {
             console.log("not a dir?" + ex);
         }
-        // res.end(JSON.stringify(repos));
         res.json(resItem);
     });
 
