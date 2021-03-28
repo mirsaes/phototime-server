@@ -1,96 +1,83 @@
 import express from "express";
 import { ImageMetadata } from "../image-metadata";
+import { RouteUtil } from "./route-util";
 
 export default function(app: express.Application) {
-    app.post("/metadata/*", (req, res) => {
-        const itemId = decodeURIComponent(req.url.replace("/metadata/", "")).split("?")[0];
-        console.log(`modify metadata url=${itemId}`);
-
+    app.post("/metadata/*", async (req, res) => {
+        const {pathUrl, repo} = RouteUtil.extractItemURL(app, "/metadata/", req.url);
+        if (!pathUrl || !repo) {
+            res.sendStatus(404);
+            return;
+        }
         const tags = req.body.tags;
         if (tags.length !== 1) {
-            res.send("501");
+            res.sendStatus(501);
             return;
         }
 
         console.log(tags);
         const tag = tags[0];
 
-        // can this ever happen?
-        if (itemId.indexOf("..") !== -1) {
-            res.send("404");
-        }
-
-        const cachedRepos = app.phototime.getCachedRepos();
-        const repo = app.phototime.getParentRepo(itemId);
-        if (!repo) {
-            res.send("404");
-        }
-
+        const itemId = pathUrl;
         const imageMetadata = new ImageMetadata(itemId);
-        imageMetadata.addTag(tag).then((metadata) => {
-            const resp = {
-                tags: "tag added"
-            };
-            res.json(metadata);
-        }).catch((reason) => {
-            res.send("500");
-        });
+        try {
+            const tagResp = await imageMetadata.addTag(tag);
+            res.json(tagResp);
+        } catch (ex ) {
+            console.log("error");
+            res.sendStatus(500);
+        }
     });
 
-    app.delete("/metadata/*", (req, res) => {
-        const itemId = decodeURIComponent(req.url.replace("/metadata/", "")).split("?")[0];
-        console.log(`del tag url=${itemId}`);
-        // can this ever happen?
-        if (itemId.indexOf("..") !== -1) {
-            res.send("404");
+    app.delete("/metadata/*", async (req, res) => {
+        const {pathUrl, repo} = RouteUtil.extractItemURL(app, "/metadata/", req.url);
+        if (!pathUrl || !repo) {
+            res.sendStatus(404);
+            return;
         }
 
         const tags = req.body.tags;
         if (tags.length !== 1) {
-            res.send("501");
+            res.sendStatus(501);
             return;
         }
 
         const tag = tags[0].trim();
         if (tag.length === 0) {
-            res.send("501");
+            res.sendStatus(501);
             return;
         }
-        const cachedRepos = app.phototime.getCachedRepos();
-        const repo = app.phototime.getParentRepo(itemId);
-        if (!repo) {
-            res.send("404");
-        }
 
-        const imageMetadata = new ImageMetadata(itemId);
-        imageMetadata.deleteTag(tag).then((metadata) => {
+        const itemId = pathUrl;
+        try {
+            const imageMetadata = new ImageMetadata(itemId);
+            const deletedTag = await imageMetadata.deleteTag(tag);
             const resp = {
-                tags: "tag deleted"
+                tagsDeleted: [deletedTag]
             };
-            res.json(metadata);
-        }).catch((reason) => {
-            res.send("500");
-        });
 
+            res.json(resp);
+        } catch (error) {
+            res.sendStatus(500);
+        }
+        return;
     });
 
-    app.get("/metadata/*", (req, res) => {
-        const itemId = decodeURIComponent(req.url.replace("/metadata/", "")).split("?")[0];
-        // can this ever happen?
-        if (itemId.indexOf("..") !== -1) {
-            res.send("404");
-        }
-        const cachedRepos = app.phototime.getCachedRepos();
-        const repo = app.phototime.getParentRepo(itemId);
-        if (!repo) {
-            res.send("404");
+    app.get("/metadata/*", async (req, res) => {
+        const {pathUrl, repo} = RouteUtil.extractItemURL(app, "/metadata/", req.url);
+        if (!pathUrl || !repo) {
+            res.sendStatus(404);
+            return;
         }
 
+        const itemId = pathUrl;
         const imageMetadata = new ImageMetadata(itemId);
-        imageMetadata.readAll().then((metadata) => {
+        try {
+            const metadata = await imageMetadata.readAll();
             res.json(metadata);
-        }).catch((reason) => {
-            res.send("500");
-        });
+        } catch (error) {
+            res.sendStatus(500);
+        }
+        return;
     });
 }

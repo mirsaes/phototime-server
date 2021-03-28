@@ -1,4 +1,5 @@
 import express from "express";
+import { RouteUtil } from "./route-util";
 
 export default function(app: express.Application) {
     /**
@@ -15,18 +16,10 @@ export default function(app: express.Application) {
      *              description: repos blah
      */
     app.put("/imageedit/crop/*", async (req, res) => {
-        const pathUrl = decodeURIComponent(req.url.replace("/imageedit/crop/", "")).split("?")[0];
-        // can this ever happen?
-        if (pathUrl.indexOf("..") !== -1) {
-            res.send("404");
-        }
-        // verify pathUrl is one of the repos
-        console.log("TODO: verify pathUrl starts with one of the repos");
-        // ensure repos are cached
-        const cachedRepos = app.phototime.getCachedRepos();
-        const repo = app.phototime.getParentRepo(pathUrl);
-        if (!repo) {
-            res.send("404");
+        const {pathUrl, repo} = RouteUtil.extractItemURL(app, "/imageedit/crop/", req.url);
+        if (!pathUrl || !repo) {
+            res.sendStatus(404);
+            return;
         }
 
         const resItem: any = {};
@@ -36,7 +29,7 @@ export default function(app: express.Application) {
 
         // if not a file, ignore it
         if ("file" !== preCropItemInfo.type) {
-            res.send("404");
+            res.sendStatus(404);
         }
         try {
             const cropParams = {

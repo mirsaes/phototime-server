@@ -68,12 +68,10 @@ export class Phototime {
         const aid = this.pathToId(apath);
 
         let bestRepo;
-        console.log("aid:" + aid);
 
         // maybe need  a set of repos .. or something rather than looping
         // not sure why i did it this way
         for (const repo of repos) {
-            console.log("repo id:" + repo.id);
             if (aid.indexOf(repo.id) >= 0) {
                 if (!bestRepo || bestRepo.id.length < repo.id.length) {
                     bestRepo = repo;
