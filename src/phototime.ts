@@ -114,7 +114,7 @@ export class Phototime {
         fileItems = Util.removeJunk(fileItems, this.config.extensions);
         // fileItems = removeJunk app, fileItems
         const keepItems = folderItems;
-        console.log("proces fileItems");
+        console.log("process fileItems");
         for (const fileItem of fileItems) {
             const fullIdPath = parentId + "/" + fileItem;
             const thumbUrl = this.getThumbUrl(fullIdPath);
