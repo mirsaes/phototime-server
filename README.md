@@ -24,7 +24,7 @@ Hiya, lets get started.
 
 Installation is intended to be via a docker image.
 
-It is easiest to leverage the phototime server and client baked together. See [phototime-client](https://github.com/mirsaes/phototime-client) source on github or [mirsaes/phototime](https://gooogle.com) docker image.
+It is easiest to leverage the phototime server and client baked together. See [phototime-client](https://github.com/mirsaes/phototime-client) source on github or [mirsaes/phototime](https://hub.docker.com/r/mirsaes/phototime) docker image.
 
 If you would like more control over the server, proceed below.
 
@@ -95,7 +95,7 @@ Then follow below steps.
 
 ## build and run
 ```
-npm install
+npm install -production=false
 npm start
 ```
 
