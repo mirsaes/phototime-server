@@ -1,5 +1,6 @@
 import express from "express";
 import { Repo } from "../repo";
+import { RouteUtil } from "./route-util";
 
 class RepoResponse {
     public info: Repo;
@@ -50,34 +51,21 @@ export default function(app: express.Application) {
     app.get("/repo/*", (req, res) => {
         // everything following /repo is the path
         // but return nothing if contains ..
-        // console.log req.url
-        let pathUrl = req.url.replace("/repo/", "");
-        console.log("pathUrl=" + pathUrl);
-        // can this ever happen?
-        if (pathUrl.indexOf("..") !== -1) {
-            res.send("404");
+        const {pathUrl, repo} = RouteUtil.extractItemURL(app, "/repo/", req.url);
+        if (!pathUrl || !repo) {
+            res.sendStatus(404);
+            return;
         }
 
-        // ensure repos are cached
-        const cachedRepos = app.phototime.getCachedRepos();
+        // have path to folder/file
+        // if folder (which it should be given its a repo)
+        // then iterate over items in folder
+        const resRepo = new RepoResponse();
+        resRepo.info = repo;
 
-        // verify pathUrl is one of the repos
-        pathUrl = pathUrl.split("?")[0];
+        console.log(repo);
+        resRepo.items = app.phototime.getRepoItems(repo.id);
 
-        const repo = app.phototime.getParentRepo(pathUrl);
-        if (!repo) {
-            res.send("404");
-        } else {
-            // have path to folder/file
-            // if folder (which it should be given its a repo)
-            // then iterate over items in folder
-            const resRepo = new RepoResponse();
-            resRepo.info = repo;
-
-            console.log(repo);
-            resRepo.items = app.phototime.getRepoItems(repo.id);
-
-            res.json(resRepo);
-        }
+        res.json(resRepo);
     });
 }

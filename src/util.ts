@@ -15,6 +15,39 @@ export class Util {
         return result;
     }
 
+    public static isRaw(apath: string) {
+        let isRaw: boolean = false;
+        const lastNode = Util.lastNode(apath);
+        const ext = Util.getExt(lastNode);
+        console.log(`isRaw ext=${ext}`);
+
+        if ([".crw", ".CRW", ".cr2", ".CR2", ".nef", ".NEF"].indexOf(ext) >= 0) {
+            isRaw = true;
+        }
+
+        console.log(`isRaw=${isRaw}. apath=${apath}`);
+        return isRaw;
+    }
+
+    public static getExt(apath: string): string {
+        const lastNode = Util.lastNode(apath);
+        if (lastNode && lastNode.length > 0) {
+            const parts =  lastNode.split(".");
+            if (parts.length >= 2) {
+                return "." + parts[parts.length - 1];
+            }
+        }
+
+        return "";
+    }
+
+    public static removeExt(apath: string): string  {
+        const ext = this.getExt(apath);
+        if (ext && ext.length > 0) {
+            return apath.substr(0, apath.length - ext.length);
+        }
+        return apath;
+    }
     public static lastNode(apath: string): string {
         let nodes = apath.split("/");
         nodes = nodes[nodes.length - 1].split("\\");

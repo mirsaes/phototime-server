@@ -1,22 +1,27 @@
 // requires imagemagic cli tools to be installed..
 import exec from "child_process";
+import { promisify } from "util";
+import { Util } from "./util";
 
 export class ImageEdit {
 
     public async resize(srcFile: string, destFile: string, width: number) {
+
+        if (Util.isRaw(srcFile)) {
+            return this.resizeRaw(srcFile, destFile, width);
+        }
+
         const resizeArg = `-resize ${width}`;
-        return new Promise((resolve, reject) => {
-            exec.exec(`convert "${srcFile}" ${resizeArg} "${destFile}"`
-                , (error: exec.ExecException, stdout: string, stderr: string) => {
-                    if (error) {
-                        console.log("oops during resize");
-                        console.log(error);
-                        throw error;
-                    }
-                    console.log("completing resize of " + srcFile);
-                    resolve(stdout);
-                });
-        });
+
+        const execPromise = promisify(exec.exec);
+        const cmd = `convert "${srcFile}" ${resizeArg} "${destFile}"`;
+        try {
+            const { stdout, stderr } = await execPromise(cmd);
+            return stdout;
+        } catch (error) {
+            console.log("error");
+            throw error;
+        }
     }
 
     public async crop(srcFile: string, destFile: string, x: number, y: number, width: number, height: number) {
@@ -50,6 +55,31 @@ export class ImageEdit {
                     resolve(cropResponse);
                 });
             });
+        }
+    }
+
+    private async resizeRaw(srcFile: string, destFile: string, width: number) {
+        /*
+        raw stuff
+        # extract thumbnail
+        dcraw -e <filename>
+        # extract image
+        dcraw <filename>
+        generates either jpg or PPM
+
+        if ppm can convert with "convert <filename>.ppm <filename>.jpg"
+        */
+        // could convert to jpg then resize or just extract thumb which might not be the right size
+        // for now, just extract the thumb until it doesn't work
+        console.log("resize raw");
+        const execPromise = promisify(exec.exec);
+
+        const cmd = `dcraw -e -O "${destFile}" "${srcFile}"`;
+
+        try {
+            const { stdout, stderr } = await execPromise(cmd);
+        } catch (error) {
+            throw error;
         }
     }
 }

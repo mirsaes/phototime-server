@@ -1,4 +1,7 @@
 import exec from "child_process";
+import e from "express";
+import { promisify } from "util";
+import { Util } from "./util";
 
 export class ImageMetadata {
     public srcFile: string;
@@ -19,75 +22,84 @@ export class ImageMetadata {
     }
 
     public async readAll(): Promise<any> {
-        return new Promise((resolve, reject) => {
-            exec.exec(`exiftool "${this.srcFile}"`,
-                (exifErr: exec.ExecException, stdoutText, stderrText ) => {
-                    if (!exifErr) {
-                        // which exiftool library to use? not sure, just load properties as a dictionary for now
-                        const lines = stdoutText.split("\n");
-                        const metadata: any = {};
-                        for (const line of lines) {
-                            const parts = line.trim().split(":");
-                            if (parts.length !== 2) {
-                                continue;
-                            }
-                            const key = parts[0].trim();
-                            const val = parts[1].trim();
-                            metadata[key] = val;
-                        }
-                        resolve(metadata);
-                    } else {
-                        console.log("oops - exif error occurred");
+        /*
+        raw stuff
+        # extract thumbnail
+        dcraw -e <filename>
 
-                        console.log(exifErr);
-                        console.log(`stderrText=${stderrText}`);
-                        throw stderrText;
-                    }
-                });
-        });
+        # list info
+        dcraw -i -v <filename>
+        outputs
+            Thumb Size
+            Timestamp
+            etc
+
+        # extract image
+        dcraw <filename>
+        generates either jpg or PPM
+
+        if ppm can convert with "convert <filename>.ppm <filename>.jpg"
+
+        */
+
+        let isRaw: boolean = false;
+        const lastNode = Util.lastNode(this.srcFile);
+        const ext = Util.getExt(lastNode);
+        console.log(`metadata ext=${ext}`);
+
+        isRaw = Util.isRaw(lastNode);
+
+        if (isRaw) {
+            console.log("reading raw metadata");
+            return this.readRawMetadata();
+        }
+        try {
+            const execPromise = promisify(exec.exec);
+
+            const { stdout, stderr } = await execPromise(`exiftool "${this.srcFile}"`);
+
+            if (stderr && stderr.length) {
+                console.log("oops - " + stderr);
+            }
+
+            const metadata: any = this.parseMetadata(stdout);
+            return metadata;
+        } catch (e) {
+            console.log("error reading metadata");
+            throw  e;
+        }
     }
 
-    public async addTag(tag: string): Promise<any> {
-        return new Promise((resolve, reject) => {
-            // exiftool -keywords+=one
-            exec.exec(`exiftool -keywords+=${tag} "${this.srcFile}"`,
-                (exifErr: exec.ExecException, stdoutText, stderrText) => {
-                    if (!exifErr) {
-                        //
-                        resolve({});
-                    } else {
-                        console.log("oops - exif error adding tag");
-                        console.log(exifErr);
-                        console.log(`stderrText=${stderrText}`);
-                        throw stderrText;
-                    }
-            });
-        });
+    public async addTag(tag: string): Promise<string> {
+        const cmd = `exiftool -keywords+="${tag}" "${this.srcFile}"`;
+        try {
+            const execPromise = promisify(exec.exec);
+            const { stdout, stderr } = await execPromise(cmd);
+            return tag;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 
-    public async deleteTag(tag: string): Promise<any> {
-        return new Promise((resolve, reject) => {
-            // exiftool -keywords-=one
-            exec.exec(`exiftool -keywords-=${tag} "${this.srcFile}"`,
-                (exifErr: exec.ExecException, stdoutText, stderrText) => {
-                    if (!exifErr) {
-                        //
-                        resolve({});
-                    } else {
-                        console.log("oops - exif error deleting tag");
-                        console.log(exifErr);
-                        console.log(`stderrText=${stderrText}`);
-                        throw stderrText;
-                    }
-            });
-        });
+    public async deleteTag(tag: string): Promise<string> {
+        // exiftool -keywords-=one
+        const cmd = `exiftool -keywords-="${tag}" "${this.srcFile}"`;
+        try {
+            const execPromise = promisify(exec.exec);
+            const { stdout, stderr } = await execPromise(cmd);
+            return tag;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 
-    public rateItem(rating: number) {
+    public async rateItem(rating: number): Promise<number> {
         // TODO: check for resetting rating..
         if (rating < 0 || rating > 5) {
             console.warn(`invalid rating ${rating}`);
-            return;
+            throw new RangeError(`invalid rating ${rating}. must be 0-5 inclusive`);
         }
 
         const ratingPercent = this.ratingToWindowsPercent[rating];
@@ -95,13 +107,45 @@ export class ImageMetadata {
         // could make this a config for "safety"
         const overwriteOriginal = "-overwrite_original";
         // exiftool -rating=3 -ratingpercent=60 imagepath
-        exec.exec(`exiftool ${overwriteOriginal} -rating=${rating} -ratingpercent=${ratingPercent} "${this.srcFile}"`,
-            (exifErr: exec.ExecException, stdoutText, stderrText ) => {
-                if (!exifErr) {
-                    console.log(`rated item? rating=${rating} ratingpercent=${ratingPercent}`);
-                    console.log(stdoutText);
-                }
+        const cmd = `exiftool ${overwriteOriginal} -rating=${rating} -ratingpercent=${ratingPercent} "${this.srcFile}"`;
+        try {
+            const execPromise = promisify(exec.exec);
+            const { stdout, stderr } = await execPromise(cmd);
+            return rating;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    private async readRawMetadata(): Promise<any> {
+        try {
+            const execPromise = promisify(exec.exec);
+
+            const { stdout, stderr } = await execPromise(`dcraw -i -v "${this.srcFile}"`);
+
+            if (stderr && stderr.length) {
+                console.log("oops - " + stderr);
             }
-        );
+
+            const metadata: any = this.parseMetadata(stdout);
+            return metadata;
+        } catch (error) {
+            throw e;
+        }
+    }
+
+    private parseMetadata(stdout: any): any {
+        const metadata: any = {};
+        const lines = stdout.split("\n");
+        for (const line of lines) {
+            const parts = line.trim().split(":");
+            if (parts.length !== 2) {
+                continue;
+            }
+            const key = parts[0].trim();
+            const val = parts[1].trim();
+            metadata[key] = val;
+        }
+        return metadata;
     }
 }

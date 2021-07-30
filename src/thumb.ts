@@ -39,7 +39,7 @@ export class Thumb {
 
     public init() {
         const orig = this.srcFile;
-        let dest = this.destFile;
+        const dest = this.destFile;
 
         if (Util.doesFileExist(dest)) {
             this.done = true;
@@ -54,20 +54,20 @@ export class Thumb {
         // really last node name
         const extNodes = destNodeExt[0].split(".");
         const ext: string = "." + extNodes[extNodes.length - 1];
-        // console.log ext
         Util.mymakeDirs(destNodes);
+        // app.rawExtensions
+        this.raw = Util.isRaw(orig);
+        // this should work, but lets by pass it for now, needs debugging
+        this.raw = false;
+        if (this.raw) {
+            console.log("yikes its raw");
+            const dest2 = `${dest}.jpg`;
 
-        if (ext in [".cr2", ".CR2"]) {
-            // console.log "yikes its raw"
-            dest = `${dest}.jpg`;
-
-            if (Util.doesFileExist(dest)) {
-                this.processDest = dest;
+            if (Util.doesFileExist(dest2)) {
+                this.processDest = dest2;
                 this.done = true;
-                return dest;
+                return dest2;
             }
-
-            this.raw = true;
         }
 
         this.processDest = dest;
