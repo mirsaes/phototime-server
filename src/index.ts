@@ -1,4 +1,5 @@
 import express, { response } from "express";
+import cors from "cors";
 
 import fs from "fs";
 import path from "path";
@@ -56,7 +57,10 @@ const specs = swaggerJsDoc(swaggerOptions);
 
 // TODO: declare subclass that has own typed data and functions for app
 const app = express();
+// const cors = cors();
 app.use(express.json());
+// enable all cors for now - https://expressjs.com/en/resources/middleware/cors.html
+app.use(cors());
 
 routes.loadRoutes(app);
 

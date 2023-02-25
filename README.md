@@ -24,7 +24,10 @@ Hiya, lets get started.
 
 Installation is intended to be via a docker image.
 
-It is easiest to leverage the phototime server and client baked together. See [phototime-client](https://github.com/mirsaes/phototime-client) source on github or [mirsaes/phototime](https://hub.docker.com/r/mirsaes/phototime) docker image.
+It is easiest to leverage the phototime server and client baked together.
+Follow instructions on docker hub [mirsaes/phototime](https://hub.docker.com/r/mirsaes/phototime).
+
+The phototime image combines this phototime-server with a phototime-client. See [phototime-client](https://github.com/mirsaes/phototime-client) source on github. New versions will include the react based client, see [pcr](https://github.com/mirsaes/pcr)
 
 If you would like more control over the server, proceed below.
 
@@ -57,12 +60,12 @@ Create .env file to bind data and repo locations
 
 # Roadmap - ideas
 * android app ala [JobHunter](https://play.google.com/store/apps/details?id=com.mirsaes.jobhunter)
-* integrate cropping on front-end/backend
-  * e.g. https://www.npmjs.com/package/cropperjs
-  * when first was looking, considered darkroomjs, but that appears to have lost steam
 * and many more
   
 # Version History
+* 2023.02.11 - cropping is available, updating library versions
+  * node 18
+  * compatible with react phototime client [pcr](https://github.com/mirsaes/pcr)
 * 2021.03.27 - tag
   * WIP tagging capability
   * add or delete tags from jpg images
@@ -91,7 +94,7 @@ Then follow below steps.
 ## configuration
 * create an appConfig.json to define the servers "repos" and working directories (trash and thumbs, etc)
     * see the sample-appConfig.json
-    * recommend specifying the jquery phototime-client webapp but can also just use the "swagger" endpoints (or some custom client)
+    * recommend specifying the react based pcr (a phototime-client) or the older jquery phototime-client webapp but can also just use the "swagger" endpoints (or some custom client)
 
 ## build and run
 ```

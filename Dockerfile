@@ -1,6 +1,6 @@
 # https://nodejs.org/en/docs/guides/nodejs-docker-webapp/
 # https://nodejs.org/en/about/releases/
-FROM node:14 as builder
+FROM node:18 as builder
 
 LABEL maintainer="mirsaes"
 
@@ -30,7 +30,7 @@ COPY . .
 RUN npm run-script build
 
 ### 
-FROM node:14 as app
+FROM node:18 as app
 LABEL maintainer="mirsaes"
 
 WORKDIR /phototime-server

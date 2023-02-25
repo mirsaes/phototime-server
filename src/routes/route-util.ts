@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path";
 import { Repo } from "../repo";
 
 export interface ExtractedURLRepo {
@@ -13,10 +14,12 @@ export class RouteUtil {
      * @returns exracted item url or null if invalid
      */
     public static extractItemURL(app: express.Application, routePrefix: string, url: string): ExtractedURLRepo {
+        const result: ExtractedURLRepo = {pathUrl:null, repo:null};
+
         const pathUrl = decodeURIComponent(url.replace(routePrefix, "")).split("?")[0];
         // can this ever happen?
         if (pathUrl.indexOf("..") !== -1) {
-            return null;
+            return result;
         }
 
         // verify pathUrl is one of the repos
@@ -26,8 +29,12 @@ export class RouteUtil {
         const cachedRepos = app.phototime.getCachedRepos();
         const repo = app.phototime.getParentRepo(pathUrl);
         if (!repo) {
-            return null;
+            console.log('return null no repo');
+            return result;
         }
-        return { pathUrl, repo};
+        result.pathUrl=pathUrl;
+        result.repo = repo;
+
+        return result;
     }
 }
